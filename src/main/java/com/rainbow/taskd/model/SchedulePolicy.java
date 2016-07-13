@@ -3,35 +3,48 @@ package com.rainbow.taskd.model;
 /**
  * 任务调度策略
  */
-public class SchedulePolicy {
+public interface SchedulePolicy {
 
-    private static final long UNIT = 1000;
-    private static final long DELAYS[] = {UNIT, 1 * UNIT, 5 * UNIT, 20 * UNIT, 30 * UNIT};
+    /**
+     * 执行调度时每次获取的任务数量
+     *
+     * @return 任务数量
+     */
+    int getExecuteBatchSize();
 
-    private int executeBatchSize;
+    /**
+     * 调度的频率
+     *
+     * @return 毫秒数
+     */
+    int getScheduleInterval();
 
-    public int getExecuteBatchSize() {
-        return executeBatchSize;
-    }
+    /**
+     * 并行执行任务的线程最大数量
+     *
+     * @return 最大线程数
+     */
+    int getMaxConcurrentTasks();
 
-    public void setExecuteBatchSize(int executeBatchSize) {
-        this.executeBatchSize = executeBatchSize;
-    }
+    /**
+     * 任务是否应该继续重试
+     * @param task
+     * @return 是否应该继续重试
+     */
+    boolean shouldRetry(final Task task);
 
-    public boolean shouldRetry(final Task task) {
-        return task.getRetryTimes() < task.getMaxRetryTimes();
-    }
+    /**
+     * 是否应该将任务移出队列
+     * @param task
+     * @return 是否应该将任务移出队列
+     */
+    boolean shouldArchiveTask(Task task);
 
-    public boolean shouldArchiveTask(Task task) {
-        return task.getStatus() == TaskStatus.PROCESSED.ordinal()
-                || (task.getRetryTimes() >= task.getMaxRetryTimes());
-    }
+    /**
+     * 计算任务重试的延时时间
+     * @param task
+     * @return 延时毫秒数
+     */
+    long calculateRetryDelayTime(Task task);
 
-    public long calculateRetryDelayTime(Task task) {
-        if (task.getRetryTimes() >= 0 && task.getRetryTimes() < DELAYS.length) {
-            return DELAYS[task.getRetryTimes()];
-        } else {
-            return 60 * UNIT;
-        }
-    }
 }

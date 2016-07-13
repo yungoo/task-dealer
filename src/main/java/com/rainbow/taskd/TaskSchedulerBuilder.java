@@ -1,6 +1,7 @@
 package com.rainbow.taskd;
 
 import com.rainbow.taskd.impl.*;
+import com.rainbow.taskd.model.DefaultSchedulePolicy;
 import com.rainbow.taskd.model.SchedulePolicy;
 
 import java.util.HashMap;
@@ -20,10 +21,10 @@ public class TaskSchedulerBuilder {
 
     public static class SetupExecutor {
 
-        private int maxConcurrentTasks;
-        private int batchSize;
-        private int scheduleInterval;
+        private SchedulePolicy schedulePolicy;
+
         private Map<Integer, TaskExecutor> executorMap = new HashMap<Integer, TaskExecutor>();
+
 
         public SetupExecutor addTaskExecutor(int type, TaskExecutor executor) {
             executorMap.put(type, executor);
@@ -31,22 +32,8 @@ public class TaskSchedulerBuilder {
             return this;
         }
 
-        public SetupExecutor maxConcurrentTasks(int maxConcurrentTasks) {
-            this.maxConcurrentTasks = maxConcurrentTasks;
-
-            return this;
-        }
-
-        public SetupExecutor batchSize(int batchSize) {
-            this.batchSize = batchSize;
-
-            return this;
-        }
-
-
-        public SetupExecutor scheduleInterval(int interval) {
-            this.scheduleInterval = batchSize;
-
+        public SetupExecutor shedulePolicy(SchedulePolicy policy) {
+            this.schedulePolicy = policy;
             return this;
         }
 
@@ -79,13 +66,15 @@ public class TaskSchedulerBuilder {
         ts.setTaskQueue(taskQueue);
 
         // 设置调度策略
-        SchedulePolicy policy = new SchedulePolicy();
-        policy.setExecuteBatchSize(executorConfig.batchSize);
-        ts.setSchedulerPolicy(policy);
+        SchedulePolicy policy = executorConfig.schedulePolicy;
+        if (policy == null) {
+            policy = new DefaultSchedulePolicy();
+        }
+        ts.setSchedulePolicy(policy);
 
         // 设置驱动器
-        ts.setSchedulerDriver(new TaskSchedulerDriverImpl(executorConfig.scheduleInterval,
-                executorConfig.maxConcurrentTasks));
+        ts.setSchedulerDriver(new TaskSchedulerDriverImpl(policy.getScheduleInterval(),
+                policy.getMaxConcurrentTasks()));
 
         return ts;
     }

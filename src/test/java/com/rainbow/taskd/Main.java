@@ -32,9 +32,7 @@ public class Main {
                         }
                     }
                 })
-                .batchSize(2)
-                .maxConcurrentTasks(10)
-                .scheduleInterval(100)
+                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(10).batchSize(2).build())
                 .inMemoryQueue()
                 .build();
 

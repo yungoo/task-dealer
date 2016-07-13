@@ -2,8 +2,8 @@ package com.rainbow.taskd.impl;
 
 import com.rainbow.taskd.*;
 import com.rainbow.taskd.exception.TaskException;
-import com.rainbow.taskd.model.Task;
 import com.rainbow.taskd.model.SchedulePolicy;
+import com.rainbow.taskd.model.Task;
 import com.rainbow.taskd.model.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
     private TaskExecutor taskExecutor;
     private TaskExecutorObserver executorObserver;
 
-    private SchedulePolicy schedulerPolicy;
+    private SchedulePolicy schedulePolicy;
 
     private TaskSchedulerDriver schedulerDriver;
 
@@ -42,7 +42,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
     }
 
     public boolean cron() {
-        int batchSize = schedulerPolicy.getExecuteBatchSize();
+        int batchSize = schedulePolicy.getExecuteBatchSize();
         if (batchSize == 0) {
             return false;
         }
@@ -71,7 +71,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
 
             task.setStatus(TaskStatus.PROCESSED.ordinal());
 
-            if (schedulerPolicy.shouldArchiveTask(task)) {
+            if (schedulePolicy.shouldArchiveTask(task)) {
                 scheduleArchiveTask(task);
             }
 
@@ -80,10 +80,10 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
 
             notifyObserverTaskFailed(task);
 
-            if (schedulerPolicy.shouldRetry(task)) {
+            if (schedulePolicy.shouldRetry(task)) {
                 scheduleRetryTask(task);
             } else {
-                if (schedulerPolicy.shouldArchiveTask(task)) {
+                if (schedulePolicy.shouldArchiveTask(task)) {
                     scheduleArchiveTask(task);
                 }
             }
@@ -128,7 +128,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         task.setStatus(TaskStatus.PENDING.ordinal());
         task.setRetryTimes(task.getRetryTimes() + 1);
         task.setLastExecuteTime(new Timestamp(System.currentTimeMillis()));
-        task.setRequestTime(new Timestamp(System.currentTimeMillis() + schedulerPolicy.calculateRetryDelayTime(task)));
+        task.setRequestTime(new Timestamp(System.currentTimeMillis() + schedulePolicy.calculateRetryDelayTime(task)));
     }
 
     private void scheduleArchiveTask(Task task) {
@@ -155,8 +155,8 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         this.executorObserver = executorObserver;
     }
 
-    public void setSchedulerPolicy(SchedulePolicy schedulerPolicy) {
-        this.schedulerPolicy = schedulerPolicy;
+    public void setSchedulePolicy(SchedulePolicy schedulePolicy) {
+        this.schedulePolicy = schedulePolicy;
     }
 
     public void setSchedulerDriver(TaskSchedulerDriver schedulerDriver) {

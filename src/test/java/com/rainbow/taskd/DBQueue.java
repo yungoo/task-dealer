@@ -83,15 +83,13 @@ public class DBQueue {
                         }
 
                         try {
-                            Thread.sleep((long) (1000*Math.random()));
+                            Thread.sleep((long) (1000 * Math.random()));
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                 })
-                .batchSize(2)
-                .maxConcurrentTasks(4)
-                .scheduleInterval(100)
+                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(4).batchSize(2).build())
                 .externalQueue(new TaskQueueDelegate() {
 
                     public Task createTask(Task task) {
