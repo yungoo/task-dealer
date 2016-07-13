@@ -2,6 +2,7 @@ package com.rainbow.taskd;
 
 import com.rainbow.taskd.entity.CrawlTask;
 import com.rainbow.taskd.exception.TaskException;
+import com.rainbow.taskd.exception.TaskFailureException;
 import com.rainbow.taskd.model.Task;
 import com.rainbow.taskd.repository.CrawlTaskRepository;
 import org.junit.Test;
@@ -35,16 +36,9 @@ public class DBQueue {
 
     @Bean
     public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build();
-    }
-
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
-        LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
-        lef.setDataSource(dataSource);
-        lef.setJpaVendorAdapter(jpaVendorAdapter);
-        lef.setPackagesToScan("com.rainbow.taskd.entity");
-        return lef;
+        return new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.H2)
+                .build();
     }
 
     @Bean
@@ -54,6 +48,15 @@ public class DBQueue {
         hibernateJpaVendorAdapter.setGenerateDdl(true);
         hibernateJpaVendorAdapter.setDatabase(Database.H2);
         return hibernateJpaVendorAdapter;
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
+        LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
+        lef.setDataSource(dataSource);
+        lef.setJpaVendorAdapter(jpaVendorAdapter);
+        lef.setPackagesToScan("com.rainbow.taskd.entity");
+        return lef;
     }
 
     @Bean
@@ -75,6 +78,10 @@ public class DBQueue {
                             System.out.println("-> 执行任务: " + task.getId());
                         }
 
+                        if (Math.random() < 0.3) {
+                            throw new TaskFailureException("执行失败");
+                        }
+
                         try {
                             Thread.sleep((long) (1000*Math.random()));
                         } catch (InterruptedException e) {
@@ -83,7 +90,7 @@ public class DBQueue {
                     }
                 })
                 .batchSize(2)
-                .maxConcurrentTasks(10)
+                .maxConcurrentTasks(4)
                 .scheduleInterval(100)
                 .externalQueue(new TaskQueueDelegate() {
 
@@ -128,7 +135,7 @@ public class DBQueue {
 
         assertNotNull(scheduler);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Task t = Task.newTask(1, 1L, new HashMap<String, Object>(), 3);
             scheduler.createTask(t);
             System.out.println("创建任务: " + t.getId());

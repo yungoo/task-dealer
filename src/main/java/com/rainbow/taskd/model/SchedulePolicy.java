@@ -27,11 +27,11 @@ public class SchedulePolicy {
                 || (task.getRetryTimes() >= task.getMaxRetryTimes());
     }
 
-    public long calculateRetryAfter(Task task) {
+    public long calculateRetryDelayTime(Task task) {
         if (task.getRetryTimes() >= 0 && task.getRetryTimes() < DELAYS.length) {
             return DELAYS[task.getRetryTimes()];
         } else {
-            return 60000*60L;
+            return 60 * UNIT;
         }
     }
 }

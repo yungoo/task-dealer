@@ -128,7 +128,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         task.setStatus(TaskStatus.PENDING.ordinal());
         task.setRetryTimes(task.getRetryTimes() + 1);
         task.setLastExecuteTime(new Timestamp(System.currentTimeMillis()));
-        task.setRequestTime(new Timestamp(System.currentTimeMillis() + schedulerPolicy.calculateRetryAfter(task)));
+        task.setRequestTime(new Timestamp(System.currentTimeMillis() + schedulerPolicy.calculateRetryDelayTime(task)));
     }
 
     private void scheduleArchiveTask(Task task) {
