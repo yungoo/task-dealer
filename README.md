@@ -25,9 +25,7 @@ TaskScheduler scheduler = TaskSchedulerBuilder.newBuilder()
                 }
             }
         })
-        .batchSize(2)
-        .maxConcurrentTasks(10)
-        .scheduleInterval(100)
+        .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(10).batchSize(2).build())
         .inMemoryQueue()
         .build();
 
@@ -67,9 +65,7 @@ TaskScheduler scheduler = TaskSchedulerBuilder.newBuilder()
                 }
             }
         })
-        .batchSize(2)
-        .maxConcurrentTasks(10)
-        .scheduleInterval(100)
+        .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(4).batchSize(2).build())
         .externalQueue(new TaskQueueDelegate() {
 
             public Task createTask(Task task) {
