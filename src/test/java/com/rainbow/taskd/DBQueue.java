@@ -99,7 +99,7 @@ public class DBQueue {
                         task.setId(t.getId());
                         return task;
                     }
-                    
+
                     @Transactional
                     public List<Task> dequeTasks(int batchSize) {
                         List<Task> taskList = new LinkedList<Task>();

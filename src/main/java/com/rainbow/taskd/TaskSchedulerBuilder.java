@@ -32,14 +32,24 @@ public class TaskSchedulerBuilder {
             return this;
         }
 
-        public SetupExecutor shedulePolicy(SchedulePolicy policy) {
+        public SetupQueue shedulePolicy(SchedulePolicy policy) {
+            assert schedulePolicy == null;
             this.schedulePolicy = policy;
-            return this;
+            return new SetupQueue(this);
+        }
+
+    }
+
+    public static class SetupQueue {
+        SetupExecutor setupExecutor;
+
+        public SetupQueue(SetupExecutor setupExecutor) {
+            this.setupExecutor = setupExecutor;
         }
 
         public TaskSchedulerBuilder inMemoryQueue() {
             TaskSchedulerBuilder builder = new TaskSchedulerBuilder();
-            builder.executorConfig = this;
+            builder.executorConfig = this.setupExecutor;
             builder.taskQueue = new InMemoryTaskQueue();
 
             return builder;
@@ -47,12 +57,11 @@ public class TaskSchedulerBuilder {
 
         public TaskSchedulerBuilder externalQueue(TaskQueueDelegate delegate) {
             TaskSchedulerBuilder builder = new TaskSchedulerBuilder();
-            builder.executorConfig = this;
+            builder.executorConfig = this.setupExecutor;
             builder.taskQueue = new ExternalTaskQueue(delegate);
 
             return builder;
         }
-
     }
 
     public TaskScheduler build() {
