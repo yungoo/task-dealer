@@ -52,6 +52,8 @@ public class InMemoryTaskQueue implements TaskQueue {
                 Task t = tasks.peek();
                 if (t != null && t.getRequestTime().before(now)) {
                     ret.add(tasks.poll());
+                } else {
+                    break;
                 }
             }
         } finally {

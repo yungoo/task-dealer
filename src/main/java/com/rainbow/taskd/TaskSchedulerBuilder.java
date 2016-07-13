@@ -1,9 +1,6 @@
 package com.rainbow.taskd;
 
-import com.rainbow.taskd.impl.TaskExecutorManager;
-import com.rainbow.taskd.impl.InMemoryTaskQueue;
-import com.rainbow.taskd.impl.TaskSchedulerDriverImpl;
-import com.rainbow.taskd.impl.TaskSchedulerImpl;
+import com.rainbow.taskd.impl.*;
 import com.rainbow.taskd.model.SchedulePolicy;
 
 import java.util.HashMap;
@@ -57,6 +54,14 @@ public class TaskSchedulerBuilder {
             TaskSchedulerBuilder builder = new TaskSchedulerBuilder();
             builder.executorConfig = this;
             builder.taskQueue = new InMemoryTaskQueue();
+
+            return builder;
+        }
+
+        public TaskSchedulerBuilder externalQueue(TaskQueueDelegate delegate) {
+            TaskSchedulerBuilder builder = new TaskSchedulerBuilder();
+            builder.executorConfig = this;
+            builder.taskQueue = new ExternalTaskQueue(delegate);
 
             return builder;
         }
