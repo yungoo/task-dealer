@@ -1,5 +1,5 @@
 # task-dealer
-a task scheduler demo
+a task dealer demo
 
 # usage
 
