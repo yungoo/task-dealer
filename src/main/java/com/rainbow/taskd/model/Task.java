@@ -20,12 +20,16 @@ public class Task implements Serializable {
     private Timestamp lastExecuteTime;
     private Timestamp createTime;
 
-    public static Task newTask(int taskType, Long requestId, Map<String, Object> params, int maxRetryTimes) {
+    public static Task newTask(int taskType, Long requestId, Map params, int maxRetryTimes) {
+        return newTask(taskType, requestId, params == null ? null : JSON.toJSONString(params), maxRetryTimes);
+    }
+
+    public static Task newTask(int taskType, Long requestId, String params, int maxRetryTimes) {
         Task task = new Task();
 
         task.setType(taskType);
         task.setRequestId(requestId);
-        task.setParams(JSON.toJSONString(params));
+        task.setParams(params);
 
         task.setStatus(TaskStatus.PENDING.ordinal());
         task.setRetryTimes(0);
