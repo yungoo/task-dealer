@@ -99,15 +99,7 @@ public class DBQueue {
                         task.setId(t.getId());
                         return task;
                     }
-
-                    public Task requeueTask(Task task) {
-                        CrawlTask t = new CrawlTask();
-                        BeanUtils.copyProperties(task, t);
-                        t = repository.save(t);
-                        task.setId(t.getId());
-                        return task;
-                    }
-
+                    
                     @Transactional
                     public List<Task> dequeTasks(int batchSize) {
                         List<Task> taskList = new LinkedList<Task>();

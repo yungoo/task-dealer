@@ -16,12 +16,6 @@ public interface TaskQueueDelegate {
     Task createTask(Task task);
 
     /**
-     * 重新入队
-     * @param task
-     */
-    Task requeueTask(Task task);
-
-    /**
      * 批量出队
      * @param batchSize
      * @return

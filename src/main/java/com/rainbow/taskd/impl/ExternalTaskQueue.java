@@ -26,7 +26,7 @@ public class ExternalTaskQueue implements TaskQueue {
 
     public Long enque(Task task) {
         if (task.getId() != null) {
-            task = delegate.requeueTask(task);
+            delegate.updateTask(task);
         } else {
             task = delegate.createTask(task);
         }
