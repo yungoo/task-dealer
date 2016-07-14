@@ -85,9 +85,9 @@ TaskScheduler scheduler = TaskSchedulerBuilder.newBuilder()
             }
 
             @Transactional
-            public List<Task> dequeTasks(int batchSize) {
+            public List<Task> dequeTasks(Set<Integer> interestTypes, int batchSize）{
                 List<Task> taskList = new LinkedList<Task>();
-                List<CrawlTask> tasks = repository.getBatchTasksForExecute(batchSize);
+                List<CrawlTask> tasks = repository.getBatchTasksForExecute(interestTypes, batchSize);
                 if (tasks != null) {
                     for (CrawlTask t : tasks) {
                         Task task = new Task();
