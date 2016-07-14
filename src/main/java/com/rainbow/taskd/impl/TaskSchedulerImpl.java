@@ -76,7 +76,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
             }
 
         } catch (TaskException e) {
-            logger.error("Failure when when task=[{}]", task.toString(), e);
+            logger.debug("Failure when when task=[{}]", task.toString(), e);
 
             notifyObserverTaskFailed(task);
 

@@ -36,6 +36,13 @@ public class SchedulePolicyBuilder {
         return this;
     }
 
+    public SchedulePolicyBuilder retryDelays(long delays[]) {
+        assert delays != null && delays.length > 3;
+        policy.setRetryDelays(delays);
+        return this;
+    }
+
+
     public SchedulePolicy build() {
         return policy;
     }

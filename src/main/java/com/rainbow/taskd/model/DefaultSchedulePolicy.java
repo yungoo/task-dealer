@@ -8,7 +8,7 @@ public class DefaultSchedulePolicy implements SchedulePolicy {
     private static final long UNIT = 1000;
     private static final long DELAYS[] = {UNIT, 1 * UNIT, 5 * UNIT, 20 * UNIT, 30 * UNIT};
 
-    private long delays[];
+    private long retryDelays[];
     private int scheduleInterval;
     private int maxConcurrentTasks;
     private int executeBatchSize;
@@ -33,7 +33,7 @@ public class DefaultSchedulePolicy implements SchedulePolicy {
         this.scheduleInterval = scheduleInterval;
         this.maxConcurrentTasks = maxConcurrentTasks;
         this.executeBatchSize = executeBatchSize;
-        this.delays = delays;
+        this.retryDelays = delays;
     }
 
     public int getExecuteBatchSize() {
@@ -60,6 +60,14 @@ public class DefaultSchedulePolicy implements SchedulePolicy {
         this.maxConcurrentTasks = maxConcurrentTasks;
     }
 
+    public long[] getRetryDelays() {
+        return retryDelays;
+    }
+
+    public void setRetryDelays(long[] retryDelays) {
+        this.retryDelays = retryDelays;
+    }
+
     public boolean shouldRetry(final Task task) {
         return task.getRetryTimes() < task.getMaxRetryTimes();
     }
@@ -70,8 +78,8 @@ public class DefaultSchedulePolicy implements SchedulePolicy {
     }
 
     public long calculateRetryDelayTime(Task task) {
-        if (task.getRetryTimes() >= 0 && task.getRetryTimes() < delays.length) {
-            return delays[task.getRetryTimes()];
+        if (task.getRetryTimes() >= 0 && task.getRetryTimes() < retryDelays.length) {
+            return retryDelays[task.getRetryTimes()];
         } else {
             return 60 * UNIT;
         }

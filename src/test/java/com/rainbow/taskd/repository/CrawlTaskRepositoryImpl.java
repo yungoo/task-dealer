@@ -18,7 +18,9 @@ public class CrawlTaskRepositoryImpl implements ExtCrawlTaskRepository {
     @Transactional
     public List<CrawlTask> getBatchTasksForExecute(int batchSize) {
         final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-        List<CrawlTask> tasks = crawlTaskRepository.getBatchTasks(TaskStatus.PENDING.ordinal(), batchSize);
+        List<CrawlTask> tasks = crawlTaskRepository.getBatchTasks(TaskStatus.PENDING.ordinal(),
+                currentTime,
+                batchSize);
         for (CrawlTask t : tasks) {
             t.setStatus(TaskStatus.PROCESSING.ordinal());
             t.setLastExecuteTime(currentTime);
