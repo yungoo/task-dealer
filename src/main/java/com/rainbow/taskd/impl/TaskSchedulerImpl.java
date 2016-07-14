@@ -76,7 +76,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
             }
 
         } catch (TaskException e) {
-            logger.debug("Failure when when task=[{}]", task.toString(), e);
+            logger.debug("Failure when run task=[{}]", task.toString(), e);
 
             notifyObserverTaskFailed(task);
 
@@ -85,6 +85,8 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
             } else {
                 if (schedulePolicy.shouldArchiveTask(task)) {
                     scheduleArchiveTask(task);
+                } else {
+                    task.setStatus(TaskStatus.PROCESSED.ordinal());
                 }
             }
         } finally {
