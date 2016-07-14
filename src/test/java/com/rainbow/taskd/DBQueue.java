@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertNotNull;
 
@@ -101,9 +102,9 @@ public class DBQueue {
                     }
 
                     @Transactional
-                    public List<Task> dequeTasks(int batchSize) {
+                    public List<Task> dequeTasks(Set<Integer> interestTypes, int batchSize) {
                         List<Task> taskList = new LinkedList<Task>();
-                        List<CrawlTask> tasks = repository.getBatchTasksForExecute(batchSize);
+                        List<CrawlTask> tasks = repository.getBatchTasksForExecute(interestTypes, batchSize);
                         if (tasks != null) {
                             for (CrawlTask t : tasks) {
                                 Task task = new Task();

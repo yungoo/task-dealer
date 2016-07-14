@@ -3,6 +3,7 @@ package com.rainbow.taskd;
 import com.rainbow.taskd.model.Task;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 队列接口
@@ -18,10 +19,12 @@ public interface TaskQueue {
 
     /**
      * 出队
+     *
+     * @param interestTypes
      * @param batchSize
      * @return
      */
-    List<Task> deque(int batchSize);
+    List<Task> deque(Set<Integer> interestTypes, int batchSize);
 
     /**
      * 执行后反馈

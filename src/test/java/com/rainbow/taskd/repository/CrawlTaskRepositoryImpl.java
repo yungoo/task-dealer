@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class CrawlTaskRepositoryImpl implements ExtCrawlTaskRepository {
@@ -16,9 +17,11 @@ public class CrawlTaskRepositoryImpl implements ExtCrawlTaskRepository {
     private CrawlTaskRepository crawlTaskRepository;
 
     @Transactional
-    public List<CrawlTask> getBatchTasksForExecute(int batchSize) {
+    public List<CrawlTask> getBatchTasksForExecute(Set<Integer> interestTypes, int batchSize) {
         final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-        List<CrawlTask> tasks = crawlTaskRepository.getBatchTasks(TaskStatus.PENDING.ordinal(),
+        List<CrawlTask> tasks = crawlTaskRepository.getBatchTasks(
+                interestTypes,
+                TaskStatus.PENDING.ordinal(),
                 currentTime,
                 batchSize);
         for (CrawlTask t : tasks) {

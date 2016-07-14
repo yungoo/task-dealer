@@ -41,7 +41,7 @@ public class InMemoryTaskQueue implements TaskQueue {
         return null;
     }
 
-    public List<Task> deque(int batchSize) {
+    public List<Task> deque(Set<Integer> interestTypes, int batchSize) {
         final Date now = new Date();
         List<Task> ret = new LinkedList<Task>();
 
@@ -50,7 +50,9 @@ public class InMemoryTaskQueue implements TaskQueue {
         try {
             while (batchSize-- > 0) {
                 Task t = tasks.peek();
-                if (t != null && t.getRequestTime().before(now)) {
+                if (t != null
+                        && interestTypes.contains(t.getType())
+                        && t.getRequestTime().before(now)) {
                     ret.add(tasks.poll());
                 } else {
                     break;

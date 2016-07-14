@@ -16,7 +16,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
     private Logger logger = LoggerFactory.getLogger(TaskSchedulerImpl.class);
 
     private TaskQueue taskQueue;
-    private TaskExecutor taskExecutor;
+    private TaskExecutorManager taskExecutorManager;
     private TaskExecutorObserver executorObserver;
 
     private SchedulePolicy schedulePolicy;
@@ -30,7 +30,9 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
     }
 
     public void start() {
-        schedulerDriver.start(this);
+        if (!taskExecutorManager.getInterestTypes().isEmpty()) {
+            schedulerDriver.start(this);
+        }
     }
 
     public void stop() {
@@ -47,7 +49,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
             return false;
         }
 
-        final List<Task> taskList = taskQueue.deque(batchSize);
+        final List<Task> taskList = taskQueue.deque(taskExecutorManager.getInterestTypes(), batchSize);
         if (taskList == null || taskList.isEmpty()) {
             return false;
         }
@@ -67,7 +69,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         notifyObserverBeforeTask(task);
 
         try {
-            taskExecutor.run(task);
+            taskExecutorManager.run(task);
 
             task.setStatus(TaskStatus.PROCESSED.ordinal());
 
@@ -86,7 +88,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
                 if (schedulePolicy.shouldArchiveTask(task)) {
                     scheduleArchiveTask(task);
                 } else {
-                    task.setStatus(TaskStatus.PROCESSED.ordinal());
+                    task.setStatus(TaskStatus.FAILED.ordinal());
                 }
             }
         } finally {
@@ -149,8 +151,8 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         this.taskQueue = taskQueue;
     }
 
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
+    public void setTaskExecutorManager(TaskExecutorManager taskExecutorManager) {
+        this.taskExecutorManager = taskExecutorManager;
     }
 
     public void setExecutorObserver(TaskExecutorObserver executorObserver) {

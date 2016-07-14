@@ -68,8 +68,8 @@ public class TaskSchedulerBuilder {
         TaskSchedulerImpl ts = new TaskSchedulerImpl();
 
         // 设置任务执行器
-        TaskExecutor te = new TaskExecutorManager(executorConfig.executorMap);
-        ts.setTaskExecutor(te);
+        TaskExecutorManager te = new TaskExecutorManager(executorConfig.executorMap);
+        ts.setTaskExecutorManager(te);
 
         // 设置队列
         ts.setTaskQueue(taskQueue);

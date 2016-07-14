@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 基于委托的queue
@@ -33,8 +34,8 @@ public class ExternalTaskQueue implements TaskQueue {
         return task.getId();
     }
 
-    public List<Task> deque(int batchSize) {
-        List<Task> tasks = delegate.dequeTasks(batchSize);
+    public List<Task> deque(Set<Integer> interestTypes, int batchSize) {
+        List<Task> tasks = delegate.dequeTasks(interestTypes, batchSize);
         return tasks;
     }
 
