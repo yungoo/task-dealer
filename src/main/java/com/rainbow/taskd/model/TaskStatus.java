@@ -16,7 +16,4 @@ public enum TaskStatus {
 
     /* 已归档 */
     ARCHIVED,
-
-    FAILED,
-
 }

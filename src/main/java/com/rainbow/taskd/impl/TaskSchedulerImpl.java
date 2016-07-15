@@ -44,24 +44,27 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
     }
 
     public boolean cron() {
-        int batchSize = schedulePolicy.getExecuteBatchSize();
-        if (batchSize == 0) {
-            return false;
-        }
+        try {
+            int batchSize = schedulePolicy.getExecuteBatchSize();
+            if (batchSize == 0) {
+                return false;
+            }
 
-        final List<Task> taskList = taskQueue.deque(taskExecutorManager.getInterestTypes(), batchSize);
-        if (taskList == null || taskList.isEmpty()) {
-            return false;
-        }
+            final List<Task> taskList = taskQueue.deque(taskExecutorManager.getInterestTypes(), batchSize);
+            if (taskList == null || taskList.isEmpty()) {
+                return false;
+            }
 
-        for (final Task task : taskList) {
-            schedulerDriver.execute(new Runnable() {
-                public void run() {
-                    runTask(task);
-                }
-            });
+            for (final Task task : taskList) {
+                schedulerDriver.execute(new Runnable() {
+                    public void run() {
+                        runTask(task);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            logger.error("任务调度失败", e);
         }
-
         return true;
     }
 
@@ -88,7 +91,7 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
                 if (schedulePolicy.shouldArchiveTask(task)) {
                     scheduleArchiveTask(task);
                 } else {
-                    task.setStatus(TaskStatus.FAILED.ordinal());
+                    task.setStatus(TaskStatus.PROCESSED.ordinal());
                 }
             }
         } finally {
