@@ -1,7 +1,7 @@
 package com.rainbow.taskd.exception;
 
 /**
- * Created by haiyang on 16/7/12.
+ * 任务执行异常
  */
 public abstract class TaskException extends RuntimeException {
 

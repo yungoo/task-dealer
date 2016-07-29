@@ -6,7 +6,6 @@ import com.rainbow.taskd.TaskSchedulerDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,7 +15,7 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     private int scheduleInterval = 100;
     private int maxConcurrentTasks = 10;
-    private AtomicBoolean mainThreadStoped = new AtomicBoolean(false);
+    private AtomicBoolean mainThreadKilled = new AtomicBoolean(false);
     private AtomicBoolean isLastCronIdle = new AtomicBoolean(false);
     private AtomicBoolean isJoin = new AtomicBoolean(false);
 
@@ -38,7 +37,7 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
                     executorService.execute(new Runnable() {
                         public void run() {
                             logger.debug("调度线程开始运行");
-                            while (!mainThreadStoped.get()) {
+                            while (!mainThreadKilled.get()) {
                                 int activeCount = executorService.getActiveCount();
                                 int maxCount = executorService.getMaximumPoolSize();
                                 if (activeCount != maxCount) {
@@ -67,7 +66,7 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     public void stop() {
         if (executorService != null) {
-            mainThreadStoped.set(true);
+            mainThreadKilled.set(true);
 
             if (!executorService.isShutdown()) {
                 try {
