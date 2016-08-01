@@ -2,7 +2,6 @@ package com.rainbow.taskd;
 
 import com.rainbow.taskd.entity.CrawlTask;
 import com.rainbow.taskd.exception.TaskException;
-import com.rainbow.taskd.exception.TaskFailureException;
 import com.rainbow.taskd.model.Task;
 import com.rainbow.taskd.repository.CrawlTaskRepository;
 import org.junit.Test;
@@ -79,18 +78,18 @@ public class DBQueue {
                             System.out.println("-> 执行任务: " + task.getId());
                         }
 
-                        if (Math.random() < 0.3) {
-                            throw new TaskFailureException("执行失败");
-                        }
+//                        if (Math.random() < 0.3) {
+//                            throw new TaskFailureException("执行失败");
+//                        }
 
                         try {
-                            Thread.sleep((long) (1000 * Math.random()));
+                            Thread.sleep((long) (300 * Math.random()));
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                 })
-                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(4).batchSize(2).build())
+                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(100).batchSize(100).build())
                 .externalQueue(new TaskQueueDelegate() {
 
                     public Task createTask(Task task) {
@@ -104,7 +103,7 @@ public class DBQueue {
                     @Transactional
                     public List<Task> dequeTasks(Set<Integer> interestTypes, int batchSize) {
                         List<Task> taskList = new LinkedList<Task>();
-                        List<CrawlTask> tasks = repository.getBatchTasksForExecute(interestTypes, batchSize);
+                        List<CrawlTask> tasks = repository.getTasksForExecute(interestTypes, batchSize);
                         if (tasks != null) {
                             for (CrawlTask t : tasks) {
                                 Task task = new Task();
@@ -126,7 +125,7 @@ public class DBQueue {
 
         assertNotNull(scheduler);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10000; i++) {
             Task t = Task.newTask(1, 1L, new HashMap<String, Object>(), 3);
             scheduler.createTask(t);
             System.out.println("创建任务: " + t.getId());
@@ -134,5 +133,6 @@ public class DBQueue {
 
         scheduler.start();
         scheduler.join();
+        System.out.println("任务已全部完成");
     }
 }

@@ -14,7 +14,7 @@ public class DefaultSchedulePolicy implements SchedulePolicy {
     private int executeBatchSize;
 
     public DefaultSchedulePolicy() {
-        this(100, 10, 10, DELAYS);
+        this(10 * 1000, 10, 10, DELAYS);
     }
 
     public DefaultSchedulePolicy(int maxConcurrentTasks, int executeBatchSize) {

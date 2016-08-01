@@ -10,6 +10,6 @@ import java.util.Set;
  */
 public interface ExtCrawlTaskRepository {
 
-    List<CrawlTask> getBatchTasksForExecute(Set<Integer> interestTypes, int batchSize);
+    List<CrawlTask> getTasksForExecute(Set<Integer> interestTypes, int batchSize);
 
 }

@@ -43,12 +43,14 @@ public class TaskSchedulerImpl implements TaskScheduler, CronJob {
         schedulerDriver.join();
     }
 
-    public boolean cron() {
+    public boolean cron(int maxJobs) {
         try {
             int batchSize = schedulePolicy.getExecuteBatchSize();
             if (batchSize == 0) {
                 return false;
             }
+
+            batchSize = Math.min(maxJobs, batchSize);
 
             final List<Task> taskList = taskQueue.deque(taskExecutorManager.getInterestTypes(), batchSize);
             if (taskList == null || taskList.isEmpty()) {

@@ -17,7 +17,7 @@ public class CrawlTaskRepositoryImpl implements ExtCrawlTaskRepository {
     private CrawlTaskRepository crawlTaskRepository;
 
     @Transactional
-    public List<CrawlTask> getBatchTasksForExecute(Set<Integer> interestTypes, int batchSize) {
+    public List<CrawlTask> getTasksForExecute(Set<Integer> interestTypes, int batchSize) {
         final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         List<CrawlTask> tasks = crawlTaskRepository.getBatchTasks(
                 interestTypes,

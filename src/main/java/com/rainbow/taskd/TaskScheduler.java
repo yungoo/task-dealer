@@ -18,12 +18,6 @@ public interface TaskScheduler {
     Long createTask(Task task) throws TaskException;
 
     /**
-     * 任务调动入口
-     * @return
-     */
-    boolean cron();
-
-    /**
      * 开始任务调度
      */
     void start();
@@ -36,7 +30,7 @@ public interface TaskScheduler {
     /**
      * 等待任务完成并退出
      *
-     * 注意：不能保证重试一定能执行
+     * 注意：不能保证一定能全部执行
      */
     void join();
 }

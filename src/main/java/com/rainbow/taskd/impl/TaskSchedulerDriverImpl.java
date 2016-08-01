@@ -15,9 +15,11 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     private int scheduleInterval = 100;
     private int maxConcurrentTasks = 10;
-    private AtomicBoolean mainThreadKilled = new AtomicBoolean(false);
-    private AtomicBoolean isLastCronIdle = new AtomicBoolean(false);
-    private AtomicBoolean isJoin = new AtomicBoolean(false);
+    private AtomicBoolean requireToExit = new AtomicBoolean(false);
+    private AtomicBoolean idling = new AtomicBoolean(false);
+    private AtomicBoolean joining = new AtomicBoolean(false);
+    private Object waitingForTask = new Object();
+    private Object readyToExit = new Object();
 
     private ThreadPoolExecutor executorService;
 
@@ -37,26 +39,37 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
                     executorService.execute(new Runnable() {
                         public void run() {
                             logger.debug("调度线程开始运行");
-                            while (!mainThreadKilled.get()) {
+                            while (!requireToExit.get()) {
                                 int activeCount = executorService.getActiveCount();
                                 int maxCount = executorService.getMaximumPoolSize();
+
                                 if (activeCount != maxCount) {
-                                    boolean hasWork = cronJob.cron();
-                                    isLastCronIdle.compareAndSet(false, !hasWork);
+                                    final boolean hasWork = cronJob.cron(maxCount - activeCount);
+                                    idling.compareAndSet(false, !hasWork);
                                 }
 
-                                if (isJoin.get() && isLastCronIdle.get()) {
+                                if (joining.get() && idling.get()) {
                                     break;
                                 }
 
-                                try {
-                                    Thread.sleep(scheduleInterval);
-                                } catch (InterruptedException e) {
+                                if (activeCount == maxCount || idling.get()) {
+                                    try {
+                                        synchronized (waitingForTask) {
+                                            waitingForTask.wait(scheduleInterval);
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
-                            logger.debug("调度线程已终止");
 
                             executorService.shutdown();
+                            // 通知线程结束
+                            synchronized (readyToExit) {
+                                readyToExit.notify();
+                            }
+
+                            logger.debug("调度线程已终止");
                         }
                     });
                 }
@@ -66,10 +79,13 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     public void stop() {
         if (executorService != null) {
-            mainThreadKilled.set(true);
+            requireToExit.set(true);
 
             if (!executorService.isShutdown()) {
                 try {
+                    synchronized (readyToExit) {
+                        readyToExit.wait();
+                    }
                     executorService.awaitTermination(60, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     logger.debug("终止任务驱动器异常", e);
@@ -81,8 +97,11 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     public void join() {
         if (executorService != null) {
-            isJoin.compareAndSet(false, true);
+            joining.compareAndSet(false, true);
             try {
+                synchronized (readyToExit) {
+                    readyToExit.wait();
+                }
                 executorService.awaitTermination(60, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.debug("终止任务驱动器异常", e);
@@ -94,6 +113,16 @@ public class TaskSchedulerDriverImpl implements TaskSchedulerDriver {
 
     public void execute(final Runnable runnable) {
         assert executorService != null;
-        executorService.execute(runnable);
+        executorService.execute(new Runnable() {
+            public void run() {
+                try {
+                    runnable.run();
+                } finally {
+                    synchronized (waitingForTask) {
+                        waitingForTask.notify();
+                    }
+                }
+            }
+        });
     }
 }

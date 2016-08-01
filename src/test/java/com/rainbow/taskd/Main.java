@@ -12,13 +12,14 @@ public class Main {
 
     @Test
     public void testTaskSchedulerBuilder() {
-        TaskScheduler scheduler = TaskSchedulerBuilder.newBuilder()
+        final TaskScheduler scheduler = TaskSchedulerBuilder.newBuilder()
                 .addTaskExecutor(1, new TaskExecutor() {
                     public void run(Task task) throws TaskException {
+                        double havy = 1.0 * Math.random();
                         if (task.getRetryTimes() > 0) {
                             System.out.println("-> 重试任务[" + task.getRetryTimes() + "]: " + task.getId());
                         } else {
-                            System.out.println("-> 执行任务: " + task.getId());
+                            System.out.println("-> 执行任务: " + task.getId() + " about:" + havy + " seconds");
                         }
 
 //                        if (Math.random() < 0.5) {
@@ -26,26 +27,32 @@ public class Main {
 //                        }
 
                         try {
-                            Thread.sleep((long) (1000*Math.random()));
+                            Thread.sleep((long) (havy * 1000L));
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                 })
-                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(10).batchSize(2).build())
+                .shedulePolicy(SchedulePolicyBuilder.newBuilder().maxConcurrentTasks(100).batchSize(100).build())
                 .inMemoryQueue()
                 .build();
 
         assertNotNull(scheduler);
 
-        for (int i = 0; i < 100; i++) {
+        final long tasksCount = 1000;
+        for (int i = 0; i < tasksCount; i++) {
             Task t = Task.newTask(1, 1L, new HashMap<String, Object>(), 3);
             scheduler.createTask(t);
-            System.out.println("创建任务: " + t.getId());
         }
+        System.out.println("已创建任务: " + tasksCount);
 
+        long begin = System.currentTimeMillis();
         scheduler.start();
         scheduler.join();
+
+        long duration = (System.currentTimeMillis() - begin);
+        double tps = ((double)tasksCount) / duration * 1000;
+        System.out.println("任务已全部完成, tps=" + tps);
     }
 
 }

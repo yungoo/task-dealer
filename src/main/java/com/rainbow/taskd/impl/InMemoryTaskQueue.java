@@ -5,6 +5,7 @@ import com.rainbow.taskd.model.Task;
 import com.rainbow.taskd.model.TaskStatus;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,8 +44,7 @@ public class InMemoryTaskQueue implements TaskQueue {
 
     public List<Task> deque(Set<Integer> interestTypes, int batchSize) {
         final Date now = new Date();
-        List<Task> ret = new LinkedList<Task>();
-
+        final List<Task> ret = new LinkedList<Task>();
 
         lock.lock();
         try {
